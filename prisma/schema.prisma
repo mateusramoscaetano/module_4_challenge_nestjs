@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Bank {
+  id          Int          @id @default(autoincrement())
+  name        String
+  number      String
+  agency      String
+  password    String
+  accounts    Account[]
+  withdrawals Withdrawal[]
+  deposits    Deposit[]
+  transfers   Tranfer[]
+}
+
+model Account {
+  id      Int  @id @default(autoincrement())
+  balance Int  @default(0)
+  user    User @relation(fields: [userEmail], references: [email])
+
+  userEmail  String
+  Withdrawal Withdrawal[]
+  Deposit    Deposit[]
+  Bank       Bank?        @relation(fields: [bankId], references: [id])
+  bankId     Int?
+}
+
+model User {
+  name      String
+  cpf       String    @db.VarChar(11)
+  birthDate DateTime
+  phone     String
+  email     String    @unique
+  password  String
+  Account   Account[]
+}
+
+model Withdrawal {
+  id         Int      @id @default(autoincrement())
+  account_id Int
+  account    Account  @relation(fields: [account_id], references: [id])
+  value      Int
+  date       DateTime @default(now())
+
+  Bank   Bank? @relation(fields: [bankId], references: [id])
+  bankId Int?
+}
+
+model Deposit {
+  id         Int      @id @default(autoincrement())
+  account_id Int
+  account    Account  @relation(fields: [account_id], references: [id])
+  value      Int
+  date       DateTime @default(now())
+
+  Bank   Bank? @relation(fields: [bankId], references: [id])
+  bankId Int?
+}
+
+model Tranfer {
+  id                 Int    @id @default(autoincrement())
+  origin_account_id  String
+  destiny_account_id String
+
+  Bank   Bank? @relation(fields: [bankId], references: [id])
+  bankId Int?
+}
