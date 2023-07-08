@@ -8,12 +8,12 @@ import { AuthService } from 'src/common/auth/auth.service';
 export class BankService {
   constructor(
     private prisma: PrismaService,
-    private authService: AuthService,
+    private authService: AuthService
   ) {}
 
   async create(createBankDto: CreateBankDto) {
     const hashedPassword = await this.authService.hashPassword(
-      createBankDto.password,
+      createBankDto.password
     );
 
     await this.prisma.bank.create({
