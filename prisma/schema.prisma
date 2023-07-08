@@ -14,7 +14,7 @@ model Bank {
   id          Int          @id @default(autoincrement())
   name        String
   number      String
-  agency      String
+  agency      String       @unique
   password    String
   accounts    Account[]
   withdrawals Withdrawal[]
