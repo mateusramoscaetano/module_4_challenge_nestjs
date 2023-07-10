@@ -19,7 +19,7 @@ model Bank {
   accounts    Account[]
   withdrawals Withdrawal[]
   deposits    Deposit[]
-  transfers   Tranfer[]
+  transfers   Transfer[]
 }
 
 model Account {
@@ -30,6 +30,7 @@ model Account {
   userEmail  String
   Withdrawal Withdrawal[]
   Deposit    Deposit[]
+  Transfer   Transfer[]
   Bank       Bank?        @relation(fields: [bankId], references: [id])
   bankId     Int?
 }
@@ -45,11 +46,11 @@ model User {
 }
 
 model Withdrawal {
-  id         Int      @id @default(autoincrement())
+  id         Int     @id @default(autoincrement())
   account_id Int
-  account    Account  @relation(fields: [account_id], references: [id])
+  account    Account @relation(fields: [account_id], references: [id])
   value      Int
-  date       DateTime @default(now())
+  date       String
 
   Bank   Bank? @relation(fields: [bankId], references: [id])
   bankId Int?
@@ -66,11 +67,15 @@ model Deposit {
   bankId Int?
 }
 
-model Tranfer {
+model Transfer {
   id                 Int    @id @default(autoincrement())
-  origin_account_id  String
-  destiny_account_id String
+  origin_account_id  Int
+  destiny_account_id Int
+  date               String
+  value              Int
 
-  Bank   Bank? @relation(fields: [bankId], references: [id])
-  bankId Int?
+  Bank      Bank?    @relation(fields: [bankId], references: [id])
+  bankId    Int?
+  Account   Account? @relation(fields: [accountId], references: [id])
+  accountId Int?
 }
