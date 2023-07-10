@@ -22,20 +22,4 @@ export class BankService {
 
     return { ...createBankDto, password: '-' };
   }
-
-  findAll() {
-    return `This action returns all bank`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} bank`;
-  }
-
-  update(id: number, updateBankDto: UpdateBankDto) {
-    return `This action updates a #${id} bank`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} bank`;
-  }
 }
