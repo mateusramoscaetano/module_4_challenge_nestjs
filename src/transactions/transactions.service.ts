@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateTransactionDepositDto } from './dto/create-transaction-deposit.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BankProvider } from 'src/bank/bank.provider';
@@ -8,17 +12,24 @@ import * as dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
 import { CreateTransactionWithdrawalDto } from './dto/create-transaction-withdrawal';
 import { CreateTransactionTransferDto } from './dto/create-transaction-transfer';
+import { AccountProvider } from 'src/accounts/accounts.provider';
+import { GetAccountDto } from 'src/accounts/dto/get-account.dto';
 
 @Injectable()
 export class TransactionsService {
   constructor(
     private prisma: PrismaService,
     private bankProvider: BankProvider,
-    private authService: AuthService
+    private authService: AuthService,
+    private accountProvider: AccountProvider
   ) {}
 
   private get bank(): GetBankDto {
     return this.bankProvider.user;
+  }
+
+  private get account(): GetAccountDto {
+    return this.accountProvider.user;
   }
 
   async createDeposit(
@@ -69,7 +80,11 @@ export class TransactionsService {
   async createWithdrawal(
     createTransactionWithdrawalDto: CreateTransactionWithdrawalDto
   ) {
-    const { id, value, password } = createTransactionWithdrawalDto;
+    if (!this.account) {
+      throw new UnauthorizedException();
+    }
+
+    const { id, value } = createTransactionWithdrawalDto;
 
     const account = await this.prisma.account.findUnique({
       where: { id },
@@ -78,15 +93,6 @@ export class TransactionsService {
 
     if (!account) {
       throw new BadRequestException('Account not found');
-    }
-
-    const passwordIsValid = await this.authService.comparePassword(
-      password,
-      account.user.password
-    );
-
-    if (!passwordIsValid) {
-      throw new BadRequestException('Invalid password or bank account');
     }
 
     if (account.balance < value) {
@@ -119,8 +125,7 @@ export class TransactionsService {
   async createTransfer(
     createTransactionTransferDto: CreateTransactionTransferDto
   ) {
-    const { destiny_account, id, password, value } =
-      createTransactionTransferDto;
+    const { destiny_account, id, value } = createTransactionTransferDto;
 
     const accountOrigin = await this.prisma.account.findUnique({
       where: { id },
@@ -137,15 +142,6 @@ export class TransactionsService {
 
     if (!accountDestiny) {
       throw new BadRequestException('Account destiny not found');
-    }
-
-    const passwordIsValid = await this.authService.comparePassword(
-      password,
-      accountOrigin.user.password
-    );
-
-    if (!passwordIsValid) {
-      throw new BadRequestException('Invalid password or bank account');
     }
 
     if (accountOrigin.balance < value) {

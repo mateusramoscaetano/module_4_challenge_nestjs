@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber } from 'class-validator';
 
 export class CreateTransactionTransferDto {
   @IsNotEmpty()
@@ -10,7 +10,4 @@ export class CreateTransactionTransferDto {
   @IsNotEmpty()
   @IsNumber()
   value: number;
-  @IsNotEmpty()
-  @IsString()
-  password: string;
 }

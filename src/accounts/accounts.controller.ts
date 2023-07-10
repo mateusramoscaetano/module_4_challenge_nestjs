@@ -31,19 +31,13 @@ export class AccountsController {
   }
 
   @Get('balance')
-  findBalance(
-    @Query('id', ParseIntPipe) id: number,
-    @Query('password') password: string
-  ) {
-    return this.accountsService.findBalance(id, password);
+  findBalance(@Query('id', ParseIntPipe) id: number) {
+    return this.accountsService.findBalance(id);
   }
 
   @Get('statement')
-  findStatement(
-    @Query('id', ParseIntPipe) id: number,
-    @Query('password') password: string
-  ) {
-    return this.accountsService.findStatement(id, password);
+  findStatement(@Query('id', ParseIntPipe) id: number) {
+    return this.accountsService.findStatement(id);
   }
 
   @Put(':id')

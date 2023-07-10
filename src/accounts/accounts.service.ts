@@ -11,20 +11,31 @@ import { Account } from '@prisma/client';
 import { BankProvider } from 'src/bank/bank.provider';
 import { GetBankDto } from 'src/bank/dto/get-bank.dto';
 import { AuthService } from 'src/common/auth/auth.service';
+import { AccountProvider } from './accounts.provider';
+import { GetAccountDto } from './dto/get-account.dto';
 
 @Injectable()
 export class AccountsService {
   constructor(
     private prisma: PrismaService,
     private bankProvider: BankProvider,
-    private authService: AuthService
+    private authService: AuthService,
+    private accountProvider: AccountProvider
   ) {}
 
   private get bank(): GetBankDto {
     return this.bankProvider.user;
   }
 
+  private get account(): GetAccountDto {
+    return this.accountProvider.user;
+  }
+
   async create(createAccountDto: CreateAccountDto) {
+    if (!this.bank.sub) {
+      throw new UnauthorizedException();
+    }
+
     const hashPassword = await this.authService.hashPassword(
       createAccountDto.user.password
     );
@@ -80,35 +91,25 @@ export class AccountsService {
     return accounts;
   }
 
-  async findBalance(id: number, password: string) {
-    if (!id || !password) {
-      throw new BadRequestException('id or password not found');
+  async findBalance(id: number) {
+    if (!this.account.sub || !this.bank.sub) {
+      throw new UnauthorizedException('You must be logged in');
     }
 
     const account = await this.prisma.account.findUnique({
       where: { id },
-      include: { user: true },
     });
 
     if (!account) {
-      throw new BadRequestException('account nott found');
-    }
-
-    const passwordIsValid = await this.authService.comparePassword(
-      password,
-      account.user.password
-    );
-
-    if (!passwordIsValid) {
-      throw new UnauthorizedException();
+      throw new BadRequestException('Account not found');
     }
 
     return account.balance;
   }
 
-  async findStatement(id: number, password: string) {
-    if (!id || !password) {
-      throw new BadRequestException('id or password not found');
+  async findStatement(id: number) {
+    if (!this.account.sub || !this.bank.sub) {
+      throw new UnauthorizedException('You must be logged in');
     }
     const account = await this.prisma.account.findUnique({
       where: { id },
@@ -122,15 +123,6 @@ export class AccountsService {
 
     if (!account) {
       throw new BadRequestException('account nott found');
-    }
-
-    const passwordIsValid = await this.authService.comparePassword(
-      password,
-      account.user.password
-    );
-
-    if (!passwordIsValid) {
-      throw new UnauthorizedException('aqui');
     }
 
     const deposits = account.Deposit;
@@ -149,6 +141,10 @@ export class AccountsService {
   }
 
   async update(id: number, updateAccountDto: UpdateAccountDto) {
+    if (!this.account.sub || !this.bank.sub) {
+      throw new UnauthorizedException('You must be logged in');
+    }
+
     const accountToUpdate = await this.prisma.account.findUnique({
       where: { id },
       include: { user: true },
@@ -159,7 +155,7 @@ export class AccountsService {
     });
 
     if (!bank) {
-      throw new UnauthorizedException('aqui');
+      throw new UnauthorizedException();
     }
 
     if (updateAccountDto.user.password) {
@@ -210,6 +206,10 @@ export class AccountsService {
   }
 
   async remove(id: number) {
+    if (!this.account.sub || !this.bank.sub) {
+      throw new UnauthorizedException('You must be logged in');
+    }
+
     const accountToRemove = await this.prisma.account.findUnique({
       where: { id },
       include: { user: true },
