@@ -8,6 +8,7 @@ import {
   ParseIntPipe,
   UseGuards,
   Put,
+  Query,
 } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import { CreateAccountDto } from './dto/create-account.dto';
@@ -29,9 +30,20 @@ export class AccountsController {
     return this.accountsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.accountsService.findOne(+id);
+  @Get('balance')
+  findBalance(
+    @Query('id', ParseIntPipe) id: number,
+    @Query('password') password: string
+  ) {
+    return this.accountsService.findBalance(id, password);
+  }
+
+  @Get('statement')
+  findStatement(
+    @Query('id', ParseIntPipe) id: number,
+    @Query('password') password: string
+  ) {
+    return this.accountsService.findStatement(id, password);
   }
 
   @Put(':id')

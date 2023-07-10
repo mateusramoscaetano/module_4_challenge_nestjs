@@ -80,8 +80,72 @@ export class AccountsService {
     return accounts;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} account`;
+  async findBalance(id: number, password: string) {
+    if (!id || !password) {
+      throw new BadRequestException('id or password not found');
+    }
+
+    const account = await this.prisma.account.findUnique({
+      where: { id },
+      include: { user: true },
+    });
+
+    if (!account) {
+      throw new BadRequestException('account nott found');
+    }
+
+    const passwordIsValid = await this.authService.comparePassword(
+      password,
+      account.user.password
+    );
+
+    if (!passwordIsValid) {
+      throw new UnauthorizedException();
+    }
+
+    return account.balance;
+  }
+
+  async findStatement(id: number, password: string) {
+    if (!id || !password) {
+      throw new BadRequestException('id or password not found');
+    }
+    const account = await this.prisma.account.findUnique({
+      where: { id },
+      include: {
+        user: true,
+        Deposit: true,
+        Transfer: true,
+        Withdrawal: true,
+      },
+    });
+
+    if (!account) {
+      throw new BadRequestException('account nott found');
+    }
+
+    const passwordIsValid = await this.authService.comparePassword(
+      password,
+      account.user.password
+    );
+
+    if (!passwordIsValid) {
+      throw new UnauthorizedException('aqui');
+    }
+
+    const deposits = account.Deposit;
+    const withdrawals = account.Withdrawal;
+    const sentTransfers = account.Transfer;
+    const receivedTransfers = await this.prisma.transfer.findMany({
+      where: { destiny_account_id: account.id },
+    });
+
+    return {
+      deposits,
+      withdrawals,
+      sentTransfers,
+      receivedTransfers,
+    };
   }
 
   async update(id: number, updateAccountDto: UpdateAccountDto) {

@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateTransactionDepositDto } from './dto/create-transaction-deposit.dto';
-import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BankProvider } from 'src/bank/bank.provider';
 import { AuthService } from 'src/common/auth/auth.service';
@@ -180,21 +179,5 @@ export class TransactionsService {
     });
 
     return 'Transfer sucessfull';
-  }
-
-  findAll() {
-    return `This action returns all transactions`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} transaction`;
-  }
-
-  update(id: number, updateTransactionDto: UpdateTransactionDto) {
-    return `This action updates a #${id} transaction`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} transaction`;
   }
 }
