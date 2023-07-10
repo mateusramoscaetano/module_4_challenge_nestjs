@@ -37,7 +37,7 @@ model Account {
 
 model User {
   name      String
-  cpf       String    @db.VarChar(11)
+  cpf       String    @unique @db.VarChar(11)
   birthDate DateTime
   phone     String
   email     String    @unique
