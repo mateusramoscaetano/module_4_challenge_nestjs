@@ -17,7 +17,7 @@ export class AccountsService {
   constructor(
     private prisma: PrismaService,
     private bankProvider: BankProvider,
-    private authService: AuthService,
+    private authService: AuthService
   ) {}
 
   private get bank(): GetBankDto {
@@ -26,7 +26,7 @@ export class AccountsService {
 
   async create(createAccountDto: CreateAccountDto) {
     const hashPassword = await this.authService.hashPassword(
-      createAccountDto.user.password,
+      createAccountDto.user.password
     );
 
     const account = await this.prisma.account.create({
@@ -90,20 +90,20 @@ export class AccountsService {
       include: { user: true },
     });
 
-    if (updateAccountDto.user.password) {
-      const hashPassword = await this.authService.hashPassword(
-        updateAccountDto.user.password,
-      );
-
-      updateAccountDto.user.password = hashPassword;
-    }
-
     const bank = await this.prisma.bank.findUnique({
-      where: { id: this.bank.sub },
+      where: { id: accountToUpdate.bankId || this.bank.sub },
     });
 
     if (!bank) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('aqui');
+    }
+
+    if (updateAccountDto.user.password) {
+      const hashPassword = await this.authService.hashPassword(
+        updateAccountDto.user.password
+      );
+
+      updateAccountDto.user.password = hashPassword;
     }
 
     const accounts = await this.prisma.account.findMany({
@@ -111,23 +111,27 @@ export class AccountsService {
       include: { user: true },
     });
 
-    const cpfExist = accounts.some(
-      (account) => account.user.cpf === updateAccountDto.user.cpf,
-    );
+    if (updateAccountDto.user.cpf) {
+      const cpfExist = accounts.some(
+        (account) => account.user.cpf === updateAccountDto.user.cpf
+      );
 
-    if (cpfExist && updateAccountDto.user.cpf !== accountToUpdate.user.cpf) {
-      throw new BadRequestException('CPF already exists');
+      if (cpfExist && updateAccountDto.user.cpf !== accountToUpdate.user.cpf) {
+        throw new BadRequestException('CPF already exists');
+      }
     }
 
-    const emailExist = accounts.some(
-      (account) => account.user.email === updateAccountDto.user.email,
-    );
+    if (updateAccountDto.user.email) {
+      const emailExist = accounts.some(
+        (account) => account.user.email === updateAccountDto.user.email
+      );
 
-    if (
-      emailExist &&
-      updateAccountDto.user.email !== accountToUpdate.user.email
-    ) {
-      throw new BadRequestException('Email already exists');
+      if (
+        emailExist &&
+        updateAccountDto.user.email !== accountToUpdate.user.email
+      ) {
+        throw new BadRequestException('Email already exists');
+      }
     }
 
     await this.prisma.account.update({
@@ -141,7 +145,25 @@ export class AccountsService {
     return 'Account successfully updated';
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} account`;
+  async remove(id: number) {
+    const accountToRemove = await this.prisma.account.findUnique({
+      where: { id },
+      include: { user: true },
+    });
+
+    if (!accountToRemove) {
+      throw new NotFoundException('Account not found');
+    }
+
+    if (accountToRemove.balance !== 0) {
+      throw new BadRequestException('Account has balance');
+    }
+
+    await this.prisma.account.delete({
+      where: { id },
+      include: { user: true },
+    });
+
+    return 'Account successfully removed';
   }
 }

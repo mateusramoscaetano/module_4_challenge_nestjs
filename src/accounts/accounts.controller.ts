@@ -39,13 +39,13 @@ export class AccountsController {
   @Put(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateAccountDto: UpdateAccountDto,
+    @Body() updateAccountDto: UpdateAccountDto
   ) {
     return this.accountsService.update(id, updateAccountDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.accountsService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.accountsService.remove(id);
   }
 }
