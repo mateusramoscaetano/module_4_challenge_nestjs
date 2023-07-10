@@ -20,7 +20,7 @@ export class AuthService {
 
     const passwordValidate = await this.comparePassword(
       loginBankDto.password,
-      bank.password,
+      bank.password
     );
 
     if (!passwordValidate) {
@@ -49,31 +49,29 @@ export class AuthService {
     });
 
     if (!accounts) {
-      throw new UnauthorizedException('aqui');
+      throw new UnauthorizedException();
     }
 
-    console.log(accounts);
-
     const accountToLog = accounts.find(
-      (account) => account.userEmail === loginAccountDto.email,
+      (account) => account.user.email === loginAccountDto.email
     );
 
     if (!accountToLog) {
-      throw new UnauthorizedException('aqui 2');
+      throw new UnauthorizedException();
     }
 
     const passwordValidate = await this.comparePassword(
       loginAccountDto.password,
-      accountToLog.user.password,
+      accountToLog.user.password
     );
 
     if (!passwordValidate) {
-      throw new UnauthorizedException('aqui 3');
+      throw new UnauthorizedException();
     }
 
     const acess_token = await this.signToken(
       accountToLog.id,
-      accountToLog.userEmail,
+      accountToLog.userEmail
     );
 
     return acess_token;
@@ -81,7 +79,7 @@ export class AuthService {
 
   async signToken(
     id: number,
-    agency?: string,
+    agency?: string
   ): Promise<{ access_token: string; redirect: string | undefined }> {
     const payload = {
       sub: id,
@@ -102,7 +100,7 @@ export class AuthService {
 
   async comparePassword(
     password: string,
-    hashedPassword: string,
+    hashedPassword: string
   ): Promise<boolean> {
     const result = await compare(password, hashedPassword);
     return result;
