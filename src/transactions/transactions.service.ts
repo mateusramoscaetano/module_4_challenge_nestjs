@@ -6,7 +6,6 @@ import {
 import { CreateTransactionDepositDto } from './dto/create-transaction-deposit.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BankProvider } from 'src/bank/bank.provider';
-import { AuthService } from 'src/common/auth/auth.service';
 import { GetBankDto } from 'src/bank/dto/get-bank.dto';
 import * as dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
