@@ -49,7 +49,7 @@ export class AccountsService {
     return account;
   }
 
-  async findAll(password: string): Promise<Account[]> {
+  async findAll(): Promise<Account[]> {
     const bank = await this.prisma.bank.findUnique({
       where: { id: this.bank.sub },
     });

@@ -3,10 +3,8 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
-  Query,
   ParseIntPipe,
   UseGuards,
   Put,
@@ -27,8 +25,8 @@ export class AccountsController {
   }
 
   @Get()
-  findAll(@Query('password') bankPassword: string) {
-    return this.accountsService.findAll(bankPassword);
+  findAll() {
+    return this.accountsService.findAll();
   }
 
   @Get(':id')
