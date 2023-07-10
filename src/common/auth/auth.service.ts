@@ -79,11 +79,11 @@ export class AuthService {
 
   async signToken(
     id: number,
-    agency?: string
+    identityConnector?: string
   ): Promise<{ access_token: string; redirect: string | undefined }> {
     const payload = {
       sub: id,
-      agency,
+      identityConnector,
     };
     const token = await this.jwtService.signAsync(payload);
 
