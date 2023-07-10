@@ -1,73 +1,578 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# desafio-backend-modulo-04-sistema-bancario-ddst10
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+![](https://i.imgur.com/xG74tOh.png)
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+# Desafio | Back-end - Módulo 2
 
-## Description
+Você acabou de ser contratado pela melhor empresa de tecnologia do mundo: a **CUBOS**.
+Sua primeira tarefa como desenvolvedor é criar uma API para um Banco Digital. Esse será um projeto **piloto**, ou seja, no futuro outras funcionalidades serão implementadas, portanto, dados do banco (nome, agência, etc.) serão imutáveis.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Seu papel é construir uma RESTful API que permita:
 
-## Installation
+-   Criar conta bancária
+-   Atualizar os dados do usuário da conta bancária
+-   Depósitar em uma conta bancária
+-   Sacar de uma conta bancária
+-   Transferir valores entre contas bancárias
+-   Consultar saldo da conta bancária
+-   Emitir extrato bancário
+-   Excluir uma conta bancária
 
-```bash
-$ npm install
+## Requisitos obrigatórios
+
+-   Sua API deve seguir o padrão REST
+-   Seu código deve estar organizado, delimitando as responsabilidades de cada arquivo adequadamente. Ou seja, é esperado que ele tenha, no mínimo:
+    -   Um arquivo index.js
+    -   Um arquivo servidor.js
+    -   Um arquivo de rotas
+    -   Um pasta com controladores
+-   Qualquer valor (dinheiro) deverá ser representado em centavos (Ex.: R$ 10,00 reais = 1000)
+-   Evite códigos duplicados. Antes de copiar e colar, pense se não faz sentido esse pedaço de código estar centralizado numa função.
+
+## Persistências dos dados
+
+Os dados serão persistidos em memória, no objeto existente dentro do arquivo `bancodedados.js`. Todas as transações e contas bancárias deverão ser inseridas dentro deste objeto, seguindo a estrutura que já existe.
+
+### Estrutura do objeto no arquivo `bancodedados.js`
+
+```javascript
+{
+    banco: {
+        nome: "Cubos Bank",
+        numero: "123",
+        agencia: "0001",
+        senha: "Cubos123Bank",
+    },
+    contas: [
+        // array de contas bancárias
+    ],
+    saques: [
+        // array de saques
+    ],
+    depositos: [
+        // array de depósitos
+    ],
+    transferencias: [
+        // array de transferências
+    ],
+}
 ```
 
-## Running the app
+## Status Code
 
-```bash
-# development
-$ npm run start
+Abaixo, listamos os possíveis `status code` esperados como resposta da API.
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```javascript
+// 200 = requisição bem sucedida
+// 201 = requisição bem sucedida e algo foi criado
+// 400 = o servidor não entendeu a requisição pois está com uma sintaxe/formato inválido
+// 404 = o servidor não pode encontrar o recurso solicitado
 ```
 
-## Test
+## Endpoints
 
-```bash
-# unit tests
-$ npm run test
+# Pessoa A
+### Listar contas bancárias
 
-# e2e tests
-$ npm run test:e2e
+#### `GET` `/contas?senha_banco=123`
 
-# test coverage
-$ npm run test:cov
+Esse endpoint deverá listar todas as contas bancárias existentes.
+
+-   Você deverá, **OBRIGATORIAMENTE**:
+
+    -   Verificar se a senha do banco foi informada (passado como query params na url)
+    -   Validar se a senha do banco está correta
+
+-   Entrada (query params)
+
+    -   Senha do banco
+
+-   Saída
+    -   listagem de todas as contas bancárias existentes
+
+#### Exemplo de retorno
+
+```javascript
+// 2 contas encontradas
+[
+    {
+        numero: "1",
+        saldo: 0,
+        usuario: {
+            nome: 'Foo Bar',
+            cpf: '00011122233',
+            data_nascimento: '2021-03-15',
+            telefone: '71999998888',
+            email: 'foo@bar.com',
+            senha: '1234'
+        }
+    },
+    {
+        numero: "2",
+        saldo: 1000,
+        usuario: {
+            nome: 'Foo Bar 2',
+            cpf: '00011122234',
+            data_nascimento: '2021-03-15',
+            telefone: '71999998888',
+            email: 'foo@bar2.com',
+            senha: '12345'
+        }
+    }
+]
+
+// nenhuma conta encontrada
+[]
+```
+# Pessoa B
+### Criar conta bancária
+
+#### `POST` `/contas`
+
+Esse endpoint deverá criar uma conta bancária, onde será gerado um número único para identificação da conta (número da conta).
+
+-   Você deverá, **OBRIGATORIAMENTE**:
+
+    -   Criar uma nova conta cujo número é único
+    -   CPF deve ser um campo único.
+    -   E-mail deve ser um campo único.
+    -   Verificar se todos os campos foram informados (todos são obrigatórios)
+    -   Definir o saldo inicial da conta como 0
+
+-   Entradas
+
+    -   Nome
+    -   Cpf
+    -   Data Nascimento
+    -   Telefone
+    -   Email
+    -   Senha
+
+-   Saída
+
+    -   Dados usuário
+    -   Número da conta
+    -   Saldo
+
+#### Função
+
+```javascript
+function criarConta(...) {
+    //
+}
 ```
 
-## Support
+#### Saída
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```javascript
+// HTTP Status 201
+{
+    numero:  "1",
+    saldo: 0,
+    usuario: {
+        nome: 'Foo Bar',
+        cpf: '00011122233',
+        data_nascimento: '2021-03-15',
+        telefone: '71999998888',
+        email: 'foo@bar.com',
+        senha: '1234'
+    }
+}
 
-## Stay in touch
+// HTTP Status 400, 404
+{
+    mensagem: 'Mensagem do erro!'
+}
+```
+# Pessoa A
+### Atualizar usuário da conta bancária
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+#### `PUT` `/contas/:numeroConta/usuario`
 
-## License
+Esse endpoint deverá atualizar apenas os dados do usuário de uma conta bancária.
 
-Nest is [MIT licensed](LICENSE).
+-   Você deverá, **OBRIGATORIAMENTE**:
+
+    -   Verificar se foi passado, ao menos, um campo no body da requisição
+    -   Verificar se o numero da conta passado como parametro na URL é válida
+    -   Se o CPF for informado, verificar se já existe outro registro com o mesmo CPF
+    -   Se o E-mail for informado, verificar se já existe outro registro com o mesmo E-mail
+    -   Atualizar um ou mais campos dos dados do usuário de uma conta bancária
+
+-   Entradas
+
+    -   Nome
+    -   Cpf
+    -   Data Nascimento
+    -   Telefone
+    -   Email
+    -   Senha
+
+-   Saída
+
+    -   Sucesso ou erro
+
+#### Função
+
+```javascript
+function atualizarUsuarioConta(...) {
+    //
+}
+```
+
+#### Saída
+
+```javascript
+// HTTP Status 200
+{
+    mensagem: "Conta atualizada com sucesso!"
+}
+
+// HTTP Status 400, 404
+{
+    mensagem: "Mensagem do erro!"
+}
+```
+# Pessoa A/B
+### Excluir Conta
+
+#### `DELETE` `/contas/:numeroConta`
+
+Esse endpoint deve excluir uma conta bancária existente.
+
+-   Você deverá, **OBRIGATORIAMENTE**:
+
+    -   Verificar se o numero da conta passado como parametro na URL é válida
+    -   Permitir excluir uma conta bancária apenas se o saldo for 0 (zero)
+    -   Remover a conta do objeto de persistência de dados.
+
+-   Entradas
+
+    -   Numero da conta bancária (passado como parâmetro na rota)
+
+-   Saida
+
+    -   Sucesso ou erro
+
+#### Função
+
+```javascript
+function excluirConta(...) {
+    //
+}
+```
+
+#### Saída
+
+```javascript
+// HTTP Status 200
+{
+    mensagem: "Conta excluída com sucesso!"
+}
+
+// HTTP Status 400, 404
+{
+    mensagem: "Mensagem do erro!"
+}
+```
+# Pessoa B
+### Depositar
+
+#### `POST` `/transacoes/depositar`
+
+Esse endpoint deverá somar o valor do depósito ao saldo de uma conta válida e registrar essa transação.
+
+-   Você deverá, **OBRIGATORIAMENTE**:
+
+    -   Verificar se o numero da conta e o valor do deposito foram informados no body
+    -   Verificar se a conta bancária informada existe
+    -   Não permitir depósitos com valores negativos ou zerados
+    -   Somar o valor de depósito ao saldo da conta encontrada
+
+-   Entrada
+
+    -   Número da conta
+    -   Valor
+
+-   Saida
+
+    -   Sucesso ou erro
+
+#### Função
+
+```javascript
+function depositar(...) {
+    //
+}
+```
+
+#### Saída
+
+```javascript
+// HTTP Status 200
+{
+    mensagem: "Depósito realizado com sucesso!"
+}
+
+// HTTP Status 400, 404
+{
+    mensagem: "Mensagem do erro!"
+}
+```
+
+#### Exemplo do registro de um depósito
+
+```javascript
+{
+    data: "2021-08-10 23:40:35",
+    numero_conta: "1",
+    valor: 10000
+}
+```
+# Pessoa A
+### Sacar
+
+#### `POST` `/transacoes/sacar`
+
+Esse endpoint deverá realizar o saque de um valor em uma determinada conta bancária e registrar essa transação.
+
+-   Você deverá, **OBRIGATORIAMENTE**:
+
+    -   Verificar se o numero da conta, o valor do saque e a senha foram informados no body
+    -   Verificar se a conta bancária informada existe
+    -   Verificar se a senha informada é uma senha válida para a conta informada
+    -   Verificar se há saldo disponível para saque
+    -   Subtrair o valor sacado do saldo da conta encontrada
+
+-   Entrada
+
+    -   Número da conta
+    -   Valor
+    -   Senha
+
+-   Saída
+
+    -   Sucesso ou erro
+
+#### Função
+
+```javascript
+function sacar(...) {
+    //
+}
+```
+
+#### Saída
+
+```javascript
+// HTTP Status 200
+{
+    mensagem: "Saque realizado com sucesso!"
+}
+
+// HTTP Status 400, 404
+{
+    mensagem: "Mensagem do erro!"
+}
+```
+
+#### Exemplo do registro de um saque
+
+```javascript
+{
+    data: "2021-08-10 23:40:35",
+    numero_conta: "1",
+    valor: 10000
+}
+```
+# Pessoa B
+### Tranferir
+
+#### `POST` `/transacoes/transferir`
+
+Esse endpoint deverá permitir a transferência de recursos (dinheiro) de uma conta bancária para outra e registrar essa transação.
+
+-   Você deverá, **OBRIGATORIAMENTE**:
+
+    -   Verificar se o número da conta de origem, de destino, senha da conta de origem e valor da transferência foram informados no body
+    -   Verificar se a conta bancária de origem informada existe
+    -   Verificar se a conta bancária de destino informada existe
+    -   Verificar se a senha informada é uma senha válida para a conta de origem informada
+    -   Verificar se há saldo disponível na conta de origem para a transferência
+    -   Subtrair o valor da transfência do saldo na conta de origem
+    -   Somar o valor da transferência no saldo da conta de destino
+
+-   Entrada
+
+    -   Número da conta (origem)
+    -   Senha da conta (origem)
+    -   Valor
+    -   Número da conta (destino)
+
+-   Saída
+
+    -   Sucesso ou erro
+
+#### Função
+
+```javascript
+function tranferir(...) {
+    //
+}
+```
+
+#### Saída
+
+```javascript
+// HTTP Status 200
+{
+    mensagem: "Transferência realizada com sucesso!"
+}
+
+// HTTP Status 400, 404
+{
+    mensagem: "Mensagem do erro!"
+}
+```
+
+#### Exemplo do registro de uma transferência
+
+```javascript
+{
+    data: "2021-08-10 23:40:35",
+    numero_conta_origem: "1",
+    numero_conta_destino: "2",
+    valor: 10000
+}
+```
+# Pessoa A
+### Saldo
+
+#### `GET` `/contas/saldo?numero_conta=123&senha=123`
+
+Esse endpoint deverá retornar o saldo de uma conta bancária.
+
+-   Você deverá, **OBRIGATORIAMENTE**:
+
+    -   Verificar se o numero da conta e a senha foram informadas (passado como query params na url)
+    -   Verificar se a conta bancária informada existe
+    -   Verificar se a senha informada é uma senha válida
+    -   Exibir o saldo da conta bancária em questão
+
+-   Entrada (query params)
+
+    -   Número da conta
+    -   Senha
+
+-   Saída
+
+    -   Saldo da conta
+
+#### Função
+
+```javascript
+function saldo(...) {
+    //
+}
+```
+
+#### Saída
+
+```javascript
+// HTTP Status 200
+{
+    saldo: 13000
+}
+
+// HTTP Status 400, 404
+{
+    mensagem: "Mensagem do erro!"
+}
+```
+# Pessoa B
+### Extrato
+
+#### `GET` `/contas/extrato?numero_conta=123&senha=123`
+
+Esse endpoint deverá listar as transações realizadas de uma conta específica.
+
+-   Você deverá, **OBRIGATORIAMENTE**:
+
+    -   Verificar se o numero da conta e a senha foram informadas (passado como query params na url)
+    -   Verificar se a conta bancária informada existe
+    -   Verificar se a senha informada é uma senha válida
+    -   Retornar a lista de transferências, depósitos e saques da conta em questão.
+
+-   Entrada (query params)
+
+    -   Número da conta
+    -   Senha
+
+-   Saída
+    -   Relatório da conta
+
+#### Função
+
+```javascript
+function extrato(...) {
+    //
+}
+```
+
+#### Saída
+
+```javascript
+// HTTP Status 200
+{
+  depositos: [
+    {
+      data: "2021-08-18 20:46:03",
+      numero_conta: "1",
+      valor: 10000
+    },
+    {
+      data: "2021-08-18 20:46:06",
+      numero_conta: "1",
+      valor: 10000
+    }
+  ],
+  saques: [
+    {
+      data: "2021-08-18 20:46:18",
+      numero_conta: "1",
+      valor: 1000
+    }
+  ],
+  transferenciasEnviadas: [
+    {
+      data: "2021-08-18 20:47:10",
+      numero_conta_origem: "1",
+      numero_conta_destino: "2",
+      valor: 5000
+    }
+  ],
+  transferenciasRecebidas: [
+    {
+      data: "2021-08-18 20:47:24",
+      numero_conta_origem: "2",
+      numero_conta_destino: "1",
+      valor: 2000
+    },
+    {
+      data: "2021-08-18 20:47:26",
+      numero_conta_origem: "2",
+      numero_conta_destino: "1",
+      valor: 2000
+    }
+  ]
+}
+
+// HTTP Status 400, 404
+{
+    mensagem: 'Mensagem do erro!'
+}
+```
+
+**LEMBRE-SE**: é melhor feito do que perfeito!!!
+
+###### tags: `back-end` `módulo 4` `nodeJS` `API REST` `desafio`
