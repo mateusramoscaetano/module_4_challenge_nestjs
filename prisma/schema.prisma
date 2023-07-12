@@ -23,11 +23,11 @@ model Bank {
 }
 
 model Account {
-  id      Int  @id @default(autoincrement())
-  balance Int  @default(0)
-  user    User @relation(fields: [userEmail], references: [email])
-
+  id         Int          @id @default(autoincrement())
+  balance    Int          @default(0)
+  user       User         @relation(fields: [userEmail], references: [email])
   userEmail  String
+  isActive   Boolean      @default(true)
   Withdrawal Withdrawal[]
   Deposit    Deposit[]
   Transfer   Transfer[]
@@ -38,7 +38,7 @@ model Account {
 model User {
   name      String
   cpf       String    @unique @db.VarChar(11)
-  birthDate DateTime
+  birthDate String
   phone     String
   email     String    @unique
   password  String
