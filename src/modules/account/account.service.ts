@@ -32,8 +32,6 @@ export class AccountService {
   }
 
   async create(createAccountDto: CreateAccountDto) {
-    console.log(createAccountDto);
-
     if (!this.bank.sub) {
       throw new UnauthorizedException();
     }
@@ -44,7 +42,6 @@ export class AccountService {
 
     const account = await this.prisma.account.create({
       data: {
-        balance: 0,
         user: {
           create: {
             name: createAccountDto.user.name,
@@ -78,6 +75,7 @@ export class AccountService {
         balance: true,
         userEmail: true,
         bankId: true,
+        isActive: true,
         user: {
           select: {
             name: true,
@@ -228,28 +226,28 @@ export class AccountService {
       throw new UnauthorizedException('You must be logged in');
     }
 
-    const accountToRemove = await this.prisma.account.findUnique({
+    const accountToDesativate = await this.prisma.account.findUnique({
       where: { id },
       include: { user: true },
     });
 
-    if (!accountToRemove) {
+    if (!accountToDesativate) {
       throw new NotFoundException('Account not found');
     }
 
-    if (id !== this.account.sub || !this.bank.sub) {
+    if (id !== this.account.sub && !this.bank.sub) {
       throw new UnauthorizedException();
     }
 
-    if (accountToRemove.balance !== 0) {
+    if (accountToDesativate.balance !== 0) {
       throw new BadRequestException('Account has balance');
     }
 
-    await this.prisma.account.delete({
+    await this.prisma.account.update({
       where: { id },
-      include: { user: true },
+      data: { isActive: false },
     });
 
-    return 'Account successfully removed';
+    return 'Account successfully desactivated';
   }
 }
