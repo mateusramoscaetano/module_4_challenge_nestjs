@@ -48,8 +48,6 @@ export class AuthService {
       },
     });
 
-    console.log(accounts);
-
     if (!accounts) {
       throw new UnauthorizedException();
     }
