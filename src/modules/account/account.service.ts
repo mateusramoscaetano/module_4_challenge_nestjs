@@ -33,7 +33,7 @@ export class AccountService {
 
   async create(createAccountDto: CreateAccountDto) {
     if (!this.bank.sub) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('You must be logged in');
     }
 
     const hashPassword = await this.authService.hashPassword(
@@ -65,7 +65,7 @@ export class AccountService {
     });
 
     if (!bank) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('You must be logged in');
     }
 
     const accounts = await this.prisma.account.findMany({
@@ -105,7 +105,7 @@ export class AccountService {
     }
 
     if (id !== this.account.sub || !this.bank.sub) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('You must be logged in');
     }
 
     return account.balance;
@@ -126,11 +126,11 @@ export class AccountService {
     });
 
     if (!account) {
-      throw new BadRequestException('account not found');
+      throw new BadRequestException('Account not found');
     }
 
     if (id !== this.account.sub || !this.bank.sub) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('You must be logged in');
     }
 
     const deposits = account.Deposit;
@@ -163,7 +163,7 @@ export class AccountService {
     }
 
     if (id !== this.account.sub || !this.bank.sub) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('You must be logged in');
     }
 
     const bank = await this.prisma.bank.findUnique({
@@ -171,7 +171,7 @@ export class AccountService {
     });
 
     if (!bank) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('You must be logged in');
     }
 
     if (updateAccountDto.user.password) {
