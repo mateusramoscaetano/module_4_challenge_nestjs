@@ -1,8 +1,10 @@
-import { IsDate, IsNotEmpty, IsString } from 'class-validator';
-
-export class CreateAccountDto {
-  user: User;
-}
+import { Type } from 'class-transformer';
+import {
+  IsDateString,
+  IsNotEmpty,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 
 class User {
   @IsString()
@@ -17,9 +19,9 @@ class User {
   @IsNotEmpty()
   phone: string;
 
-  @IsDate()
+  @IsDateString()
   @IsNotEmpty()
-  birthDate: Date;
+  birthDate: string;
 
   @IsString()
   @IsNotEmpty()
@@ -28,4 +30,10 @@ class User {
   @IsString()
   @IsNotEmpty()
   password: string;
+}
+
+export class CreateAccountDto {
+  @ValidateNested()
+  @Type(() => User)
+  user: User;
 }

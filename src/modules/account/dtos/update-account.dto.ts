@@ -1,9 +1,11 @@
+import { Type } from 'class-transformer';
 import {
-  IsDate,
+  IsDateString,
   IsEmail,
   IsNotEmpty,
   IsOptional,
   IsString,
+  ValidateNested,
 } from 'class-validator';
 
 class User {
@@ -15,9 +17,9 @@ class User {
   @IsOptional()
   cpf?: string;
 
-  @IsDate()
+  @IsDateString()
   @IsOptional()
-  birthDate?: Date;
+  birthDate?: string;
 
   @IsString()
   @IsNotEmpty()
@@ -33,6 +35,7 @@ class User {
 }
 
 export class UpdateAccountDto {
-  @IsNotEmpty()
+  @ValidateNested()
+  @Type(() => User)
   user: User;
 }
