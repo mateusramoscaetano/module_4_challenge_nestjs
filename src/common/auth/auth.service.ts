@@ -42,11 +42,13 @@ export class AuthService {
     }
 
     const accounts = await this.prisma.account.findMany({
-      where: { bankId: bank.id },
+      where: { bankId: bank.id, isActive: true },
       include: {
         user: true,
       },
     });
+
+    console.log(accounts);
 
     if (!accounts) {
       throw new UnauthorizedException();
@@ -57,7 +59,7 @@ export class AuthService {
     );
 
     if (!accountToLog) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Account not found or desactivated');
     }
 
     const passwordValidate = await this.comparePassword(
