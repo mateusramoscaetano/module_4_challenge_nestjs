@@ -31,6 +31,25 @@ export class AccountService {
     return this.accountProvider.user;
   }
 
+  private ensureLoggedIn(): void {
+    if (!this.account.sub || !this.bank.sub) {
+      throw new UnauthorizedException('You must be logged in');
+    }
+  }
+
+  private async ensureAccountExists(id: number): Promise<Account> {
+    const account = await this.prisma.account.findUnique({
+      where: { id },
+      include: { user: true },
+    });
+
+    if (!account) {
+      throw new NotFoundException('Account not found');
+    }
+
+    return account;
+  }
+
   async create(createAccountDto: CreateAccountDto) {
     if (!this.bank.sub) {
       throw new UnauthorizedException('You must be logged in');
@@ -60,11 +79,7 @@ export class AccountService {
   }
 
   async findAll(): Promise<Account[]> {
-    const bank = await this.prisma.bank.findUnique({
-      where: { id: this.bank.sub },
-    });
-
-    if (!bank) {
+    if (!this.bank.sub) {
       throw new UnauthorizedException('You must be logged in');
     }
 
@@ -92,29 +107,28 @@ export class AccountService {
   }
 
   async findBalance(id: number) {
-    if (!this.account.sub || !this.bank.sub) {
-      throw new UnauthorizedException('You must be logged in');
-    }
-
-    const account = await this.prisma.account.findUnique({
-      where: { id },
-    });
-
-    if (!account) {
-      throw new BadRequestException('Account not found');
-    }
+    this.ensureLoggedIn();
 
     if (id !== this.account.sub || !this.bank.sub) {
-      throw new UnauthorizedException('You must be logged in');
+      throw new UnauthorizedException(
+        'Account dont have access to this balance, or bank is not logged in'
+      );
     }
+
+    const account = await this.ensureAccountExists(id);
 
     return account.balance;
   }
 
   async findStatement(id: number) {
-    if (!this.account.sub || !this.bank.sub) {
-      throw new UnauthorizedException('You must be logged in');
+    this.ensureLoggedIn();
+
+    if (id !== this.account.sub || !this.bank.sub) {
+      throw new UnauthorizedException(
+        'Account dont have access to this statement, or bank is not logged in'
+      );
     }
+
     const account = await this.prisma.account.findUnique({
       where: { id },
       include: {
@@ -127,10 +141,6 @@ export class AccountService {
 
     if (!account) {
       throw new BadRequestException('Account not found');
-    }
-
-    if (id !== this.account.sub || !this.bank.sub) {
-      throw new UnauthorizedException('You must be logged in');
     }
 
     const deposits = account.Deposit;
@@ -149,8 +159,12 @@ export class AccountService {
   }
 
   async update(id: number, updateAccountDto: UpdateAccountDto) {
-    if (!this.account.sub || !this.bank.sub) {
-      throw new UnauthorizedException('You must be logged in');
+    this.ensureLoggedIn();
+
+    if (id !== this.account.sub || !this.bank.sub) {
+      throw new UnauthorizedException(
+        'Account logged cant update this account, or bank is not logged in'
+      );
     }
 
     const accountToUpdate = await this.prisma.account.findUnique({
@@ -160,18 +174,6 @@ export class AccountService {
 
     if (!accountToUpdate) {
       throw new BadRequestException('Account not found');
-    }
-
-    if (id !== this.account.sub || !this.bank.sub) {
-      throw new UnauthorizedException('You must be logged in');
-    }
-
-    const bank = await this.prisma.bank.findUnique({
-      where: { id: accountToUpdate.bankId || this.bank.sub },
-    });
-
-    if (!bank) {
-      throw new UnauthorizedException('You must be logged in');
     }
 
     if (updateAccountDto.user.password) {
@@ -222,22 +224,15 @@ export class AccountService {
   }
 
   async remove(id: number) {
-    if (!this.account.sub || !this.bank.sub) {
-      throw new UnauthorizedException('You must be logged in');
-    }
-
-    const accountToDesativate = await this.prisma.account.findUnique({
-      where: { id },
-      include: { user: true },
-    });
-
-    if (!accountToDesativate) {
-      throw new NotFoundException('Account not found');
-    }
+    this.ensureLoggedIn();
 
     if (id !== this.account.sub && !this.bank.sub) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException(
+        'Account logged cant desativate this account, or bank is not logged in'
+      );
     }
+
+    const accountToDesativate = await this.ensureAccountExists(id);
 
     if (accountToDesativate.balance !== 0) {
       throw new BadRequestException('Account has balance');
